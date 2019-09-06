@@ -1,14 +1,28 @@
 ARG KUBEBUILDER_VERSION=1.0.8
 ARG KUSTOMIZE_VERSION=1.0.11
 
-FROM golang:1.10.3 as vendor
-COPY ./ /go/src/github.com/talos-systems/cluster-api-provider-talos/
-RUN go get github.com/golang/dep/cmd/dep
-WORKDIR /go/src/github.com/talos-systems/cluster-api-provider-talos
-RUN dep ensure -v -vendor-only
+FROM golang:1.13.0-alpine as base
+RUN apk add --no-cache make curl
 
-FROM vendor AS generate
-RUN go generate ./pkg/... ./cmd/...
+FROM base AS modules
+ENV GO111MODULE on
+ENV GOPROXY https://proxy.golang.org
+ENV CGO_ENABLED 0
+WORKDIR /src/cluster-api-provider-talos
+COPY ./go.mod ./
+COPY ./go.sum ./
+RUN go mod download
+RUN go mod verify
+COPY ./cmd ./cmd
+COPY ./pkg ./pkg
+COPY ./hack ./hack
+COPY Makefile Makefile
+RUN go mod vendor
+RUN go list -mod=readonly all >/dev/null
+RUN ! go mod tidy -v 2>&1 | grep .
+
+FROM modules AS generate
+RUN make generate
 
 FROM generate AS test
 RUN mkdir -p /usr/local/kubebuilder/bin

@@ -5,9 +5,6 @@ all: test docker-build
 
 # Generate code
 generate:
-ifndef GOPATH
-	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
-endif
 	go generate ./pkg/... ./cmd/...
 	go fmt ./pkg/... ./cmd/...
 	go vet ./pkg/... ./cmd/...
