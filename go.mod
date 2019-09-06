@@ -9,12 +9,9 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/auth v0.3.0
 	github.com/Azure/go-autorest/autorest/to v0.2.0
 	github.com/aws/aws-sdk-go v1.20.21
-	github.com/coreos/go-systemd v0.0.0-20181012123002-c6f51f82210d // indirect
-	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/googleapis/gnostic v0.3.0 // indirect
-	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/onsi/gomega v1.5.0
 	github.com/packethost/packngo v0.0.0-20190507131943-1343be729ca2
 	github.com/prometheus/common v0.6.0 // indirect

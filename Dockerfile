@@ -8,7 +8,7 @@ FROM base AS modules
 ENV GO111MODULE on
 ENV GOPROXY https://proxy.golang.org
 ENV CGO_ENABLED 0
-WORKDIR /src/cluster-api-provider-talos
+WORKDIR /go/src/github.com/talos-systems/cluster-api-provider-talos
 COPY ./go.mod ./
 COPY ./go.sum ./
 RUN go mod download
