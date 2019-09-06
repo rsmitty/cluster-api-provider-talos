@@ -30,7 +30,7 @@ deploy: manifests
 	cat provider-components.yaml | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: 
+manifests:
 	docker build . --target $@ -t $(REPO):manifests --build-arg IMG="$(REPO):$(TAG)"
 	mkdir -p /tmp/manifests
 	docker run $(REPO):manifests bash -c 'cat /tmp/manifests/provider-components.yaml' > /tmp/manifests/provider-components.yaml
@@ -48,3 +48,21 @@ docker-push:
 .PHONY: login
 login:
 	@docker login --username "$(DOCKER_USERNAME)" --password "$(DOCKER_PASSWORD)"
+
+.PHONY: clientset
+clientset: bin/client-gen bin/lister-gen bin/informer-gen ## Generate a typed clientset
+	rm -rf pkg/client
+	bin/client-gen --clientset-name clientset --input-base sigs.k8s.io/cluster-api/pkg/apis \
+		--input cluster/v1alpha1 --output-package sigs.k8s.io/cluster-api/pkg/client/clientset_generated \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
+	bin/lister-gen --input-dirs sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1 \
+		--output-package sigs.k8s.io/cluster-api/pkg/client/listers_generated \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
+	bin/informer-gen --input-dirs sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1 \
+		--versioned-clientset-package sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset \
+		--listers-package sigs.k8s.io/cluster-api/pkg/client/listers_generated \
+		--output-package sigs.k8s.io/cluster-api/pkg/client/informers_generated \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
+
+bin/%-gen: ./vendor/k8s.io/code-generator/cmd/%-gen ## Build code-generator binaries
+	go build -o $@ ./$<
